@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContactBook</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-decor">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+    </div>
+
+    <div class="app-wrapper">
+        <div class="glass-container">
+            
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h1>Мои Контакты</h1>
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Поиск по имени...">
+                    </div>
+                </div>
+
+                <div id="contact-list" class="contact-list-area">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Загрузка контактов...</p>
+                    </div>
+                </div>
+
+<div class="sidebar-footer">
+    <button class="btn-add-contact" onclick="openAddModal()">
+        <i class="fas fa-plus"></i> Добавить контакт
+    </button>
+    <button id="selectModeBtn" class="btn-secondary btn-select" type="button" onclick="toggleSelectionMode()">Выбрать</button>
+    <div id="selectionActions" class="selection-actions hidden">
+        <button id="deleteSelectedBtn" class="btn-danger" type="button" onclick="bulkDeleteSelected()">Удалить выбранные</button>
+        <button id="cancelSelectBtn" class="btn-secondary" type="button" onclick="toggleSelectionMode()">Отмена</button>
+    </div>
+</div>
+            </aside>
+
+            <main class="content-view">
+                <div id="contact-details" class="details-placeholder">
+                    <div class="welcome-screen">
+                        <i class="far fa-address-book"></i>
+                        <h2>Книга контактов</h2>
+                        <p>Выберите человека из списка слева, чтобы увидеть подробную информацию или отредактировать данные.</p>
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    </div>
+
+    <div id="addModal" class="modal-overlay">
+        <div class="modal-box glass-card animate-pop">
+            <div class="modal-header">
+                <h3>Добавить контакт</h3>
+                <button class="close-btn" onclick="closeModal('addModal')">&times;</button>
+            </div>
+            <form id="addForm">
+                <div class="input-group">
+                    <label>Имя и фамилия</label>
+                    <input type="text" id="addName" required placeholder="Введите имя">
+                </div>
+                <div class="input-group">
+                    <label>Телефон</label>
+                    <input type="tel" id="addPhone" required placeholder="+7 (___) ___-____">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="addEmail" placeholder="example@mail.ru">
+                </div>
+                <div class="input-group">
+                    <label>Категория</label>
+                    <select id="addCategory">
+                        <option value="">-- Выберите --</option>
+                        <option value="Друзья">Друзья</option>
+                        <option value="Работа">Работа</option>
+                        <option value="Семья">Семья</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Адрес</label>
+                    <input type="text" id="addAddress" placeholder="ул. Ленина, 10">
+                </div>
+                <div class="input-group">
+                    <label>Заметка</label>
+                    <textarea id="addNote" placeholder="Добавьте заметку" style="min-height: 80px;"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Аватарка</label>
+                    <input type="file" id="addAvatar" accept="image/*" onchange="previewAvatar(event)">
+                    <img id="avatarAddPreview" style="width: 60px; height: 60px; margin-top: 10px; border-radius: 50%; display: none;">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('addModal')">Отмена</button>
+                    <button type="submit" class="btn-submit">Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-box glass-card animate-pop">
+            <div class="modal-header">
+                <h3>Редактирование</h3>
+                <button class="close-btn" onclick="closeModal('editModal')">&times;</button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="input-group">
+                    <label>Имя</label>
+                    <input type="text" id="editName" required>
+                </div>
+                <div class="input-group">
+                    <label>Телефон</label>
+                    <input type="tel" id="editPhone" required>
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="editEmail">
+                </div>
+                <div class="input-group">
+                    <label>Категория</label>
+                    <select id="editCategory">
+                        <option value="">-- Выберите --</option>
+                        <option value="Друзья">Друзья</option>
+                        <option value="Работа">Работа</option>
+                        <option value="Семья">Семья</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Адрес</label>
+                    <input type="text" id="editAddress" placeholder="ул. Ленина, 10">
+                </div>
+                <div class="input-group">
+                    <label>Заметка</label>
+                    <textarea id="editNote" placeholder="Добавьте заметку" style="min-height: 80px;"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>Аватарка</label>
+                    <input type="file" id="editAvatar" accept="image/*" onchange="previewAvatar(event)">
+                    <img id="avatarPreview" style="width: 60px; height: 60px; margin-top: 10px; border-radius: 50%; display: none;">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeModal('editModal')">Закрыть</button>
+                    <button type="submit" class="btn-save">Обновить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="script.js"></script>
+
+
+
+</body>
+</html>
+
