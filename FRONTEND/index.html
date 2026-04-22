@@ -25,6 +25,20 @@
                         <i class="fas fa-search"></i>
                         <input type="text" id="searchInput" placeholder="Поиск по имени...">
                     </div>
+                    <div class="filter-box">
+                        <button class="filter-btn active" data-filter="all">
+                            <i class="fas fa-list"></i> Все
+                        </button>
+                        <button class="filter-btn" data-filter="pinned">
+                            <i class="fas fa-star"></i> Избранные
+                        </button>
+                        <button class="filter-btn" data-filter="Семья">
+                            Семья
+                        </button>
+                        <button class="filter-btn" data-filter="Работа">
+                            Работа
+                        </button>
+                    </div>
                 </div>
 
                 <div id="contact-list" class="contact-list-area">
@@ -38,11 +52,6 @@
     <button class="btn-add-contact" onclick="openAddModal()">
         <i class="fas fa-plus"></i> Добавить контакт
     </button>
-    <button id="selectModeBtn" class="btn-secondary btn-select" type="button" onclick="toggleSelectionMode()">Выбрать</button>
-    <div id="selectionActions" class="selection-actions hidden">
-        <button id="deleteSelectedBtn" class="btn-danger" type="button" onclick="bulkDeleteSelected()">Удалить выбранные</button>
-        <button id="cancelSelectBtn" class="btn-secondary" type="button" onclick="toggleSelectionMode()">Отмена</button>
-    </div>
 </div>
             </aside>
 
@@ -159,6 +168,10 @@
     </div>
 
     <div id="toast-container"></div>
+
+    <button class="theme-toggle" id="themeToggle" title="Переключить тему">
+        <i class="fas fa-moon"></i>
+    </button>
 
     <script src="script.js"></script>
 

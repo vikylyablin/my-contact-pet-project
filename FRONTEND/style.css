@@ -43,7 +43,7 @@ body {
     border: 1px solid var(--glass-border);
     border-radius: 30px;
     box-shadow: var(--shadow-soft);
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* САЙДБАР */
@@ -98,6 +98,8 @@ body {
 .contact-card-small {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     padding: 12px;
     border-radius: 15px;
     cursor: pointer;
@@ -106,6 +108,17 @@ body {
 }
 
 .contact-card-small:hover { background: rgba(255, 255, 255, 0.6); transform: translateX(5px); }
+
+.contact-card-small .contact-pin {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.contact-card-small:hover .contact-pin {
+    opacity: 1;
+    visibility: visible;
+}
 
 .mini-avatar {
     width: 40px;
@@ -118,6 +131,23 @@ body {
     align-items: center;
     font-weight: 600;
     margin-right: 15px;
+}
+
+.avatar-wrapper {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+}
+
+.empty-state {
+    text-align: center;
+    color: #6b7280;
+    padding: 40px 20px;
+    font-size: 15px;
 }
 
 /* ПРАВАЯ ЧАСТЬ - ДЕТАЛИ */
@@ -156,7 +186,7 @@ body {
 .btn-round {
     width: 50px; height: 50px;
     border-radius: 50%; border: none;
-    color: white; font-size: 18px;
+    color: rgb(255, 255, 255); font-size: 18px;
     cursor: pointer; transition: var(--transition);
 }
 
@@ -185,6 +215,10 @@ body {
     padding: 12px 24px;
     border-radius: 8px;
     transition: 0.3s;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
 }
 .btn-delete:hover { background: #ffe6e3; text-decoration: none; }
 
@@ -220,6 +254,19 @@ body {
 
 .btn-secondary:hover {
     background: #edf2f7;
+}
+
+.btn-secondary.pinned {
+    background: #fffbf0;
+    color: #f59e0b;
+}
+
+.btn-secondary.pinned:hover {
+    background: #fef3e2;
+}
+
+.btn-secondary.pinned i {
+    color: #f59e0b;
 }
 
 .btn-danger {
@@ -394,6 +441,7 @@ body {
     justify-content: center; /* Центрируем по вертикали */
     padding: 20px;
     position: relative;
+    overflow: visible;
 }
 
 /* Сама белая карточка */
@@ -407,6 +455,7 @@ body {
     box-shadow: 0 15px 35px rgba(0,0,0,0.08);
     margin-top: 40px; /* Место для вылетающего аватара */
     text-align: center;
+    overflow: visible;
 }
 
 .profile-main-card .profile-name,
@@ -486,10 +535,307 @@ body {
     gap: 8px;
     transition: 0.3s;
     font-size: 14px;
-    margin: 0 auto;
+    margin: 50px auto 0;
 }
 
 .btn-add-contact:hover {
     background: #357ABD;
     transform: translateY(-2px);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.btn-select {
+    width: 90%;
+    padding: 10px 16px;
+    background: #f0f2f5;
+    color: #3b4a5a;
+    border: 1px solid rgba(59, 74, 90, 0.12);
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    transition: 0.3s;
+    margin: 12px auto 0;
+    display: block;
+}
+
+.btn-select:hover {
+    background: #e2e8f0;
+}
+
+.action-select {
+    width: 90%;
+    margin: 12px auto 0;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(59, 74, 90, 0.12);
+    background: #ffffff;
+    font-size: 14px;
+    outline: none;
+}
+
+.selection-hint {
+    width: 90%;
+    margin: 10px auto 0;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: #eef2ff;
+    color: #344054;
+    font-size: 13px;
+    text-align: center;
+}
+
+.contact-checkbox {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+}
+
+.contact-pin {
+    border: none;
+    background: transparent;
+    color: #f3b431;
+    font-size: 16px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.contact-pin.pinned {
+    color: #f59e0b;
+}
+
+/* ADMIN ACTIONS - фиксим кнопки */
+.admin-actions {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+    display: flex !important;
+    flex-wrap: nowrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.admin-actions button {
+    flex: 1;
+    padding: 12px 8px !important;
+    font-size: 13px !important;
+    border-radius: 12px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+.admin-actions .btn-secondary {
+    background: #f7f9fc;
+    color: #3b4a5a;
+    border: 1px solid rgba(59, 74, 90, 0.1);
+}
+
+.admin-actions .btn-secondary.pinned {
+    background: #fffbf0;
+    color: #f59e0b;
+}
+
+.admin-actions .btn-secondary.pinned:hover {
+    background: #fef3e2;
+}
+
+.admin-actions .btn-secondary i.fa-star {
+    margin-right: 4px;
+}
+
+.admin-actions .btn-secondary i.fa-star.fas {
+    color: #f59e0b;
+}
+
+/* FILTERS */
+.filter-box {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 12px;
+    padding: 0 10px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 6px 12px;
+    border-radius: 16px;
+    border: 1px solid rgba(59, 74, 90, 0.2);
+    background: rgba(255, 255, 255, 0.6);
+    color: #555;
+    font-size: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.filter-btn.active {
+    background: #4A90E2;
+    color: white;
+    border-color: #4A90E2;
+}
+
+.filter-btn:hover {
+    background: rgba(74, 144, 226, 0.15);
+}
+
+.filter-btn i {
+    margin-right: 4px;
+}
+
+/* THEME TOGGLE */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    background: #f0f2f5;
+    cursor: pointer;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: 0.3s;
+    z-index: 50;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+}
+
+/* DARK MODE */
+body.dark-mode {
+    background: linear-gradient(120deg, #1a1a2e 0%, #0f0f23 100%);
+}
+
+body.dark-mode .glass-container {
+    background: rgba(30, 30, 45, 0.7);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .sidebar {
+    background: rgba(20, 20, 30, 0.6);
+    border-right-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .sidebar-header h1,
+body.dark-mode .letter-divider {
+    color: #ffffff;
+}
+
+body.dark-mode .contact-card-small:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .search-box {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .search-box input {
+    background: transparent;
+    color: #ffffff;
+}
+
+body.dark-mode .profile-main-card {
+    background: #2a2a3e;
+    color: #ffffff;
+}
+
+body.dark-mode .profile-name,
+body.dark-mode .profile-phone {
+    color: #ffffff !important;
+}
+
+body.dark-mode .tile {
+    background: #1a1a2e;
+    color: #ffffff;
+}
+
+body.dark-mode .tile label {
+    color: #ffffff !important;
+}
+
+body.dark-mode .tile p {
+    color: #ffffff !important;
+}
+
+body.dark-mode .modal-box {
+    background: #2a2a3e;
+    color: #ffffff;
+}
+
+body.dark-mode .modal-header h3 {
+    color: #ffffff;
+}
+
+body.dark-mode .input-group label {
+    color: #ffffff !important;
+}
+
+body.dark-mode .input-group input,
+body.dark-mode .input-group select,
+body.dark-mode .input-group textarea {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+body.dark-mode .filter-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f0f0f0;
+}
+
+/* Welcome Screen Styles */
+.welcome-screen {
+    text-align: center;
+    color: var(--text-dark);
+}
+
+.welcome-screen h2 {
+    color: var(--text-dark);
+    font-size: 28px;
+    margin: 15px 0;
+}
+
+.welcome-screen p {
+    color: var(--text-light);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+body.dark-mode .welcome-screen {
+    color: #ffffff;
+}
+
+body.dark-mode .welcome-screen h2 {
+    color: #ffffff;
+}
+
+body.dark-mode .welcome-screen p {
+    color: #d0d0e0;
+}
+
+/* Contact card text in sidebar */
+.card-info strong {
+    color: var(--text-dark);
+}
+
+body.dark-mode .card-info strong {
+    color: #ffffff !important;
 }

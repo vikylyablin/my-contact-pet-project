@@ -21,16 +21,3 @@ class Contact(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
-    
-    # Поддержка миграции: добавляем отсутствующие колонки
-    inspector = inspect(engine)
-    if inspector.has_table('contacts'):
-        columns = [col['name'] for col in inspector.get_columns('contacts')]
-        
-        with engine.begin() as conn:
-            if 'avatar' not in columns:
-                conn.execute(text("ALTER TABLE contacts ADD COLUMN avatar TEXT"))
-            if 'address' not in columns:
-                conn.execute(text("ALTER TABLE contacts ADD COLUMN address TEXT"))
-            if 'note' not in columns:
-                conn.execute(text("ALTER TABLE contacts ADD COLUMN note TEXT"))

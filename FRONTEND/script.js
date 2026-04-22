@@ -3,14 +3,18 @@
  * Управление контактами, сортировка и работа с API
  */
 
-const BASE_URL = 'http://127.0.0.1:8000/contacts';
+const BASE_URL = 'http://127.0.0.1:8000/contacts/';
 let contactsCache = [];
 let currentContact = null;
-let selectedContactIds = new Set();
-let selectionMode = false;
+let currentFilter = 'all';
+let isDarkMode = localStorage.getItem('darkMode') === 'true';
 
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', () => {
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        updateThemeToggleIcon();
+    }
     loadContacts();
     setupEventListeners();
 });
@@ -30,12 +34,16 @@ function openAddModal() {
 async function loadContacts() {
     try {
         const response = await fetch(BASE_URL);
-        if (!response.ok) throw new Error("Не удалось загрузить данные");
+        if (!response.ok) throw new Error(`Ошибка ${response.status}: ${response.statusText}`);
         
         contactsCache = await response.json();
         renderContacts(contactsCache);
     } catch (err) {
-        showToast("Ошибка связи с сервером", "danger");
+        const list = document.getElementById('contact-list');
+        if (list) {
+            list.innerHTML = '<p class="empty-state">Нет соединения с сервером.</p>';
+        }
+        showToast(err.message || "Ошибка связи с сервером", "danger");
     }
 }
 
@@ -44,7 +52,6 @@ function renderContacts(data) {
     const list = document.getElementById('contact-list');
     list.innerHTML = '';
 
-    // Сортировка по закрепленным сначала и по алфавиту
     data.sort((a, b) => {
         if (a.is_pinned !== b.is_pinned) {
             return a.is_pinned ? -1 : 1;
@@ -55,35 +62,63 @@ function renderContacts(data) {
     const pinnedContacts = data.filter((c) => c.is_pinned);
     const normalContacts = data.filter((c) => !c.is_pinned);
 
-    data.forEach(contact => {
-        const currentLetter = contact.name[0].toUpperCase();
+    if (pinnedContacts.length) {
+        const section = document.createElement('div');
+        section.className = 'letter-divider';
+        section.innerText = 'Закреплено';
+        list.appendChild(section);
+        pinnedContacts.forEach(contact => list.appendChild(createContactCard(contact)));
+    }
 
-        // Добавляем разделитель буквы
+    let lastLetter = '';
+    normalContacts.forEach(contact => {
+        const currentLetter = contact.name[0].toUpperCase();
         if (currentLetter !== lastLetter) {
-            const div = document.createElement('div');
-            div.className = 'letter-divider';
-            div.innerText = currentLetter;
-            list.appendChild(div);
+            const divider = document.createElement('div');
+            divider.className = 'letter-divider';
+            divider.innerText = currentLetter;
+            list.appendChild(divider);
             lastLetter = currentLetter;
         }
-
-        // Создаем карточку
-        const card = document.createElement('div');
-        card.className = 'contact-card-small';
-        const avatarContent = contact.avatar 
-            ? `<img src=\"${contact.avatar}\" style=\"width: 40px; height: 40px; border-radius: 50%; object-fit: cover;\">` 
-            : `<div class=\"mini-avatar\">${currentLetter}</div>`;
-        card.innerHTML = `
-            ${avatarContent}
-            <div class="card-info">
-                <strong>${contact.name}</strong>
-            </div>
-        `;
-        
-        card.onclick = () => showContactDetails(contact);
-        list.appendChild(card);
+        list.appendChild(createContactCard(contact));
     });
 }
+
+function createContactCard(contact) {
+    const card = document.createElement('div');
+    card.className = 'contact-card-small';
+
+    const avatarContent = contact.avatar
+        ? `<img src="${contact.avatar}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`
+        : `<div class="mini-avatar">${contact.name[0].toUpperCase()}</div>`;
+
+    const avatarWrapper = document.createElement('div');
+    avatarWrapper.className = 'avatar-wrapper';
+    avatarWrapper.innerHTML = avatarContent;
+
+    const info = document.createElement('div');
+    info.className = 'card-info';
+    info.innerHTML = `<strong>${contact.name}</strong>`;
+
+    const pinButton = document.createElement('button');
+    pinButton.type = 'button';
+    pinButton.className = `contact-pin ${contact.is_pinned ? 'pinned' : ''}`;
+    pinButton.innerHTML = `<i class="${contact.is_pinned ? 'fas' : 'far'} fa-star"></i>`;
+    pinButton.title = contact.is_pinned ? 'Открепить' : 'Закрепить';
+    pinButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        togglePinnedContact(contact.id, contact.is_pinned);
+    });
+
+    card.appendChild(avatarWrapper);
+    card.appendChild(info);
+    card.appendChild(pinButton);
+
+    card.addEventListener('click', () => showContactDetails(contact));
+
+    return card;
+}
+
 
 // 3. ОТОБРАЖЕНИЕ ДЕТАЛЕЙ СПРАВА
 function showContactDetails(contact) {
@@ -127,14 +162,14 @@ function showContactDetails(contact) {
                 </div>
             </div>
 
-            <div class="admin-actions" style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #f0f0f0; display: flex; gap: 12px;">
-                <button class="btn-secondary" onclick="togglePinnedContact(${contact.id})" style="flex: 1;">
-                    <i class="${contact.is_pinned ? 'fas' : 'far'} fa-star"></i> ${contact.is_pinned ? 'Открепить' : 'Закрепить'}
+            <div class="admin-actions">
+                <button class="btn-secondary ${contact.is_pinned ? 'pinned' : ''}" onclick="togglePinnedContact(${contact.id}, ${contact.is_pinned})">
+                    <i class="fa${contact.is_pinned ? 's' : 'r'} fa-star"></i> ${contact.is_pinned ? 'Открепить' : 'Закрепить'}
                 </button>
-                <button class="btn-primary" onclick="openEditMode()" style="flex: 1;">
+                <button class="btn-primary" onclick="openEditMode()">
                     <i class="fas fa-edit"></i> Редактировать
                 </button>
-                <button class="btn-danger" onclick="deleteContactProcess('${contact.name}')" style="flex: 1;">
+                <button class="btn-danger" onclick="deleteContactProcess(${contact.id}, '${contact.name}')">
                     <i class="fas fa-trash-alt"></i> Удалить
                 </button>
             </div>
@@ -177,18 +212,21 @@ document.getElementById('addForm').onsubmit = async (e) => {
             e.target.reset();
             closeModal('addModal');
             loadContacts();
+        } else {
+            const errorText = await res.text();
+            showToast(errorText || "Ошибка при создании", "danger");
         }
     } catch (err) {
-        showToast("Ошибка при создании", "danger");
+        showToast(err.message || "Ошибка при создании", "danger");
     }
 };
 
-// 5. УДАЛЕНИЕ (DELETE) - Используем эндпоинт по имени, как в твоем main.py
-async function deleteContactProcess(name) {
-    if (!confirm(`Удалить контакт ${name}?`)) return;
+// 5. УДАЛЕНИЕ (DELETE) - Используем эндпоинт по id
+async function deleteContactProcess(contactId, contactName) {
+    if (!confirm(`Удалить контакт ${contactName}?`)) return;
 
     try {
-        const res = await fetch(`${BASE_URL}/${encodeURIComponent(name)}`, {
+        const res = await fetch(`${BASE_URL}${contactId}`, {
             method: 'DELETE'
         });
 
@@ -197,44 +235,20 @@ async function deleteContactProcess(name) {
             document.getElementById('contact-details').innerHTML = '';
             loadContacts();
         } else {
-            showToast("Ошибка при удалении", "danger");
+            const errorText = await res.text();
+            showToast(errorText || "Ошибка при удалении", "danger");
         }
     } catch (err) {
-        showToast("Не удалось удалить", "danger");
+        showToast(err.message || "Не удалось удалить", "danger");
     }
 }
 
-async function bulkDeleteSelected() {
-    if (selectedContactIds.size === 0) return;
-    if (!confirm(`Удалить ${selectedContactIds.size} выбранных контактов?`)) return;
-
-    try {
-        const res = await fetch(BASE_URL, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(Array.from(selectedContactIds))
-        });
-
-        if (res.ok) {
-            showToast("Выбранные контакты удалены");
-            selectedContactIds.clear();
-            updateBulkDeleteButton();
-            document.getElementById('contact-details').innerHTML = '';
-            loadContacts();
-        } else {
-            showToast("Ошибка массового удаления", "danger");
-        }
-    } catch (err) {
-        showToast("Не удалось удалить контакты", "danger");
-    }
-}
-
-async function togglePinnedContact(contact) {
-    if (!contact) return;
-    const res = await fetch(`${BASE_URL}/${contact.id}`, {
+async function togglePinnedContact(contactId, currentPinned) {
+    if (contactId === undefined || contactId === null) return;
+    const res = await fetch(`${BASE_URL}${contactId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_pinned: !contact.is_pinned })
+        body: JSON.stringify({ is_pinned: !currentPinned })
     });
 
     if (res.ok) {
@@ -290,7 +304,7 @@ if (editFormElement) {
             data.avatar = avatar;
         }
 
-        const res = await fetch(`${BASE_URL}/${id}`, {
+        const res = await fetch(`${BASE_URL}${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -312,7 +326,6 @@ if (editFormElement) {
 // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ (Модалки, Поиск, Тосты, Аватар)
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-function openAddModal() { openModal('addModal'); }
 
 function fileToBase64(file) {
     return new Promise((resolve, reject) => {
@@ -342,12 +355,49 @@ function setupEventListeners() {
     document.getElementById('searchInput').oninput = (e) => {
         const val = e.target.value.toLowerCase();
         const filtered = contactsCache.filter(c => c.name.toLowerCase().includes(val));
-        renderContacts(filtered);
+        applyFilter(filtered);
     };
 
-    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
-    if (bulkDeleteBtn) {
-        bulkDeleteBtn.addEventListener('click', bulkDeleteSelected);
+    // Фильтры по категориям
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            applyFilter(contactsCache);
+        });
+    });
+
+    // Переключение темы
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleDarkMode);
+    }
+}
+
+function applyFilter(data) {
+    let filtered = data;
+    
+    if (currentFilter === 'pinned') {
+        filtered = data.filter(c => c.is_pinned);
+    } else if (currentFilter !== 'all') {
+        filtered = data.filter(c => c.category === currentFilter);
+    }
+    
+    renderContacts(filtered);
+}
+
+function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    localStorage.setItem('darkMode', isDarkMode);
+    document.body.classList.toggle('dark-mode');
+    updateThemeToggleIcon();
+}
+
+function updateThemeToggleIcon() {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     }
 }
 
