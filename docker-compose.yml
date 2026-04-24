@@ -1,0 +1,18 @@
+services:
+  # Python сервер
+  backend:
+    build: ./BACKEND
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./BACKEND:/app
+
+  #интерфейс (используем готовый сервер nginx для статических файлов)
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./FRONTEND:/usr/share/nginx/html
