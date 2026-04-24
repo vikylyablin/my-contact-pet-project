@@ -1,3 +1,9 @@
+#Этот файл содержит функции для работы с базой данных, связанные с контактами.
+#CRUD - Create, Read, Update, Delete
+#Выполнение операций с базой данных через SQLAlchemy.
+#Этот файл не знает ничего про интернет или HTTP-запросы,
+#он умеет только манипулировать данными в таблицах.
+
 from sqlalchemy import Column, Integer, String, Boolean, Text
 from sqlalchemy.orm import Session
 from database import Contact
@@ -7,7 +13,7 @@ from database import Contact
 def get_contacts(db: Session, skip=0, limit=20):
     return db.query(Contact).offset(skip).limit(limit).all()
 
-#принимает любое количество параметров 
+#принимает любое количество па    раметров 
 #(email, category, address, note, avatar)
 def create_contact(db: Session, **kwargs):
     # kwargs теперь содержит name, phone, email, address и т.д.

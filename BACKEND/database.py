@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Column, Integer, String, Boolean, Text
-SQLALCHEMY_DATABASE_URL = "sqlite:///./contacts.db"
+
 
 # Загружаем переменные из .env
 load_dotenv()
@@ -14,7 +14,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./contacts.db")
 
 # database.py
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, 
+    DATABASE_URL, 
     #Это убирает ошибку "database is locked" в SQLite
     connect_args={"check_same_thread": False}
 )
