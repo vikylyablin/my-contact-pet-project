@@ -3,7 +3,7 @@
  * Управление контактами, сортировка и работа с API
  */
 
-const BASE_URL = 'http://127.0.0.1:8000/contacts/';
+const BASE_URL = 'http://localhost:8000/contacts/';
 let contactsCache = [];
 let currentContact = null;
 let currentFilter = 'all';
@@ -226,7 +226,7 @@ async function deleteContactProcess(contactId, contactName) {
     if (!confirm(`Удалить контакт ${contactName}?`)) return;
 
     try {
-        const res = await fetch(`${BASE_URL}${contactId}`, {
+        const res = await fetch(`${BASE_URL}${contactId}/`, {
             method: 'DELETE'
         });
 
@@ -245,11 +245,11 @@ async function deleteContactProcess(contactId, contactName) {
 
 async function togglePinnedContact(contactId, currentPinned) {
     if (contactId === undefined || contactId === null) return;
-    const res = await fetch(`${BASE_URL}${contactId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_pinned: !currentPinned })
-    });
+        const res = await fetch(`${BASE_URL}${contactId}/`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_pinned: !currentPinned })
+        });
 
     if (res.ok) {
         const updatedContact = await res.json();
@@ -304,7 +304,7 @@ if (editFormElement) {
             data.avatar = avatar;
         }
 
-        const res = await fetch(`${BASE_URL}${id}`, {
+        const res = await fetch(`${BASE_URL}${id}/`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)

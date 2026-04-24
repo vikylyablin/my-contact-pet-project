@@ -7,7 +7,13 @@ from database import SessionLocal, init_db
 app = FastAPI()
 init_db()
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
@@ -29,11 +35,11 @@ def create_new_contact(contact: schemas.ContactCreate, db: Session = Depends(get
     create_data = contact.model_dump(exclude_unset=True)
     return api.create_contact(db=db, **create_data)
 
-@app.delete("/contacts/{contact_id}", response_model=schemas.Contact)
+@app.delete("/contacts/{contact_id}/", response_model=schemas.Contact)
 def delete_contact_route(contact_id: int, db: Session = Depends(get_db)):
     return api.delete_contact(db=db, contact_id=contact_id)
 
-@app.patch("/contacts/{contact_id}", response_model=schemas.Contact)
+@app.patch("/contacts/{contact_id}/", response_model=schemas.Contact)
 def update_contact_route(contact_id: int, contact_data: schemas.ContactUpdate, db: Session = Depends(get_db)):
     update_data = contact_data.model_dump(exclude_unset=True)
     return api.update_contact(db=db, contact_id=contact_id, **update_data)

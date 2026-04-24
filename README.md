@@ -17,6 +17,7 @@ Backend:
 docker-compose up --build
 
 После запуска бэкенд со всей документацией доступен тут: http://localhost:8000/docs (Swagger UI). Это лучший способ проверить все методы API.
+Фронт часть - http://localhost
 
 Структура кода:
 1. BACKEND/api.py - эндпоинты и бизнес-логика.
